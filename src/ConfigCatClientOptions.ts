@@ -49,7 +49,7 @@ export abstract class OptionsBase implements IOptions {
 
     public cache: ICache;
 
-    constructor(apiKey: string, clientVersion: string, options: IOptions, defaultCache: ICache) {
+    constructor(apiKey: string, clientVersion: string, options?: IOptions, defaultCache?: ICache) {
         if (!apiKey) {
             throw new Error("Invalid 'apiKey' value");
         }
@@ -120,7 +120,7 @@ export class AutoPollOptions extends OptionsBase implements IAutoPollOptions {
     /** Maximum waiting time between the client initialization and the first config acquisition in secconds. */
     public maxInitWaitTimeSeconds: number = 5;
 
-    constructor(apiKey: string, options: IAutoPollOptions, defaultCache: ICache) {
+    constructor(apiKey: string, options?: IAutoPollOptions, defaultCache?: ICache) {
 
         super(apiKey, "a-" + COMMON_VERSION, options, defaultCache);
 
@@ -150,7 +150,7 @@ export class AutoPollOptions extends OptionsBase implements IAutoPollOptions {
 }
 
 export class ManualPollOptions extends OptionsBase implements IManualPollOptions {
-    constructor(apiKey: string, options: IManualPollOptions, defaultCache: ICache) {
+    constructor(apiKey: string, options?: IManualPollOptions, defaultCache?: ICache) {
         super(apiKey, "m-" + COMMON_VERSION, options, defaultCache);
     }
 }
@@ -160,7 +160,7 @@ export class LazyLoadOptions extends OptionsBase implements ILazyLoadingOptions 
     /** The cache TTL. */
     public cacheTimeToLiveSeconds: number = 60;
 
-    constructor(apiKey: string, options: ILazyLoadingOptions, defaultCache: ICache) {
+    constructor(apiKey: string, options?: ILazyLoadingOptions, defaultCache?: ICache) {
 
         super(apiKey, "l-" + COMMON_VERSION, options, defaultCache);
 

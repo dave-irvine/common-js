@@ -117,7 +117,7 @@ export class ConfigCatClient implements IConfigCatClient {
         });
     }
 
-    forceRefreshAsync(): Promise<any> {
+    forceRefreshAsync(): Promise<void> {
         return new Promise(async (resolve) => {
             await this.configService.refreshConfigAsync();
             resolve();
