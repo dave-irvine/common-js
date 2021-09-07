@@ -22,7 +22,7 @@ export interface IConfigCatClient {
     forceRefreshAsync(): Promise<any>;
 
     /** Gets a list of keys for all your feature flags and settings */
-    getAllKeys(callback: (value: string[]) => void);
+    getAllKeys(callback: (value: string[]) => void): any;
 
     /** Gets a list of keys for all your feature flags and settings */
     getAllKeysAsync(): Promise<string[]>;
@@ -40,7 +40,7 @@ export interface IConfigCatClient {
     getAllVariationIdsAsync(user?: User): Promise<string[]>;
 
     /** Returns the key of a setting and it's value identified by the given Variation ID (analytics) */
-    getKeyAndValue(variationId: string, callback: (settingkeyAndValue: SettingKeyValue) => void): void;
+    getKeyAndValue(variationId: string, callback: (settingKeyAndValue: SettingKeyValue) => void): void;
 
     /** Returns the key of a setting and it's value identified by the given Variation ID (analytics) */
     getKeyAndValueAsync(variationId: string): Promise<SettingKeyValue>;
@@ -76,7 +76,7 @@ export class ConfigCatClient implements IConfigCatClient {
 
         if (!configCatKernel.configFetcher) {
             throw new Error("Invalid 'configCatKernel.configFetcher' value");
-        }      
+        }
 
         this.evaluator = new RolloutEvaluator(options.logger);
 
@@ -92,7 +92,7 @@ export class ConfigCatClient implements IConfigCatClient {
     }
 
     dispose(): void {
-        if (this.configService instanceof AutoPollConfigService){
+        if (this.configService instanceof AutoPollConfigService) {
             this.configService.dispose();
         }
     }
@@ -104,9 +104,9 @@ export class ConfigCatClient implements IConfigCatClient {
     }
 
     getValueAsync(key: string, defaultValue: any, user?: User): Promise<any> {
-        return new Promise(async (resolve) => {            
-            const config = await this.configService.getConfig();            
-            var result:any = this.evaluator.Evaluate(config, key, defaultValue, user).Value;
+        return new Promise(async (resolve) => {
+            const config = await this.configService.getConfig();
+            var result: any = this.evaluator.Evaluate(config, key, defaultValue, user).Value;
             resolve(result);
         });
     }
@@ -127,7 +127,7 @@ export class ConfigCatClient implements IConfigCatClient {
     getAllKeys(callback: (value: string[]) => void) {
         this.getAllKeysAsync().then(value => {
             callback(value);
-        })
+        });
     }
 
     getAllKeysAsync(): Promise<string[]> {
@@ -178,18 +178,18 @@ export class ConfigCatClient implements IConfigCatClient {
         });
     }
 
-    getKeyAndValue(variationId: string, callback: (settingkeyAndValue: SettingKeyValue) => void): void {
+    getKeyAndValue(variationId: string, callback: (settingKeyAndValue: SettingKeyValue) => void): void {
         this.getKeyAndValueAsync(variationId).then(settingKeyAndValue => {
-            callback(settingKeyAndValue); 
-        })
+            callback(settingKeyAndValue);
+        });
     }
 
     getKeyAndValueAsync(variationId: string): Promise<SettingKeyValue> {
         return new Promise(async (resolve) => {
             const config = await this.configService.getConfig();
             if (!config || !config.ConfigJSON || !config.ConfigJSON[ConfigFile.FeatureFlags]) {
-                this.options.logger.error("config.json is not present, returning empty array");
-                resolve(null);
+                this.options.logger.error("config.json is not present, returning empty object");
+                resolve(new SettingKeyValue('', null));
                 return;
             }
 
@@ -223,17 +223,17 @@ export class ConfigCatClient implements IConfigCatClient {
                 }
             }
 
-            this.options.logger.error("Could not find the setting for the given variation ID: " + variationId);
-            resolve(null);
+            this.options.logger.error("Could not find the setting for the given variation ID: " + variationId + ", returning empty object");
+            resolve(new SettingKeyValue('', null));
         });
     }
 
-    getAllValues(callback: (result: SettingKeyValue[]) => void, user?: User): void {        
+    getAllValues(callback: (result: SettingKeyValue[]) => void, user?: User): void {
         this.getAllValuesAsync(user).then(value => {
             callback(value);
         });
     }
-    
+
     getAllValuesAsync(user?: User): Promise<SettingKeyValue[]> {
         return new Promise(async (resolve) => {
             const config = await this.configService.getConfig();
@@ -253,13 +253,18 @@ export class ConfigCatClient implements IConfigCatClient {
                     settingValue: this.evaluator.Evaluate(config, key, undefined, user).Value
                 });
             });
-            
+
             resolve(result);
-        });       
+        });
     }
 }
 
 export class SettingKeyValue {
     settingKey: string;
     settingValue: any;
+
+    constructor(settingKey: string, settingValue: any) {
+        this.settingKey = settingKey;
+        this.settingValue = settingValue;
+    }
 }
